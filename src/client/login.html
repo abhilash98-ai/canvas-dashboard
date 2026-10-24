@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in · What's Due</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="login">
+      <p class="eyebrow">Canvas assignment dashboard</p>
+      <h1>What's Due</h1>
+      <p class="lede">
+        Everything you still need to turn in, across all your Canvas courses, in one list.
+      </p>
+
+      <form id="login-form" class="panel" novalidate>
+        <label for="feed-url">Your Canvas calendar link</label>
+        <input
+          id="feed-url"
+          name="feedUrl"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="https://canvas.illinois.edu/feeds/calendars/…"
+          aria-describedby="login-error"
+        />
+        <p id="login-error" class="field-error" role="alert"></p>
+        <button id="login-button" type="submit" class="primary">Log in</button>
+
+        <details class="help" open>
+          <summary>Where do I find it?</summary>
+          <ol>
+            <li>
+              Open
+              <a href="https://canvas.illinois.edu/calendar" target="_blank" rel="noopener"
+                >Canvas Calendar</a
+              >.
+            </li>
+            <li>At the bottom right, click <strong>Calendar Feed</strong>.</li>
+            <li>Copy the link it shows and paste it above.</li>
+          </ol>
+          <p>
+            The link lets this app see your Canvas calendar: assignment names and due dates. It
+            stays saved, encrypted, so you stay logged in, until you click Log out. Keep it private,
+            like a password.
+          </p>
+        </details>
+      </form>
+
+      <p class="demo-link">Just looking? <a href="/?demo">Try it with sample assignments</a></p>
+    </main>
+    <script type="module" src="./login.ts"></script>
+  </body>
+</html>

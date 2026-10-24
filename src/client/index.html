@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>What's Due</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <header class="top">
+        <div>
+          <p id="today" class="eyebrow"></p>
+          <h1>What's Due</h1>
+          <p id="greeting" class="greeting"></p>
+          <p id="updated" class="updated"></p>
+        </div>
+        <div class="actions">
+          <button
+            id="logout"
+            type="button"
+            class="secondary"
+            title="Log out and make this site forget your Canvas calendar link"
+          >
+            Log out
+          </button>
+          <button id="refresh" type="button" class="primary" aria-label="Refresh assignments">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </header>
+
+      <section id="stats" class="stats" aria-label="Summary"></section>
+      <p id="status" role="status"></p>
+      <div id="groups"></div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
