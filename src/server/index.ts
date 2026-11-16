@@ -1,11 +1,13 @@
 import { randomBytes } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { parseEnv } from "node:util";
+import { HELPER_DIRECTORY, HelperFiles } from "../helper/helperFiles.js";
 import { createApp } from "./app.js";
+import { GrabbedStore, HiddenStore } from "./hiddenStore.js";
 import { SessionStore } from "./sessions.js";
 
 const PORT = 3001;
-// Saved logins and the secret that encrypts them. Ignored by git.
+// Saved logins, hidden-assignment rules, and the secret that protects them. Ignored by git.
 const DATA_DIRECTORY = ".data";
 
 // Settings from .env, which win over the shell environment.
@@ -48,7 +50,11 @@ if (!canvasBaseUrl.startsWith("https://")) {
   process.exit(1);
 }
 
-const sessions = new SessionStore(loadSessionSecret(settings), `${DATA_DIRECTORY}/sessions.json`);
-createApp(canvasBaseUrl, sessions).listen(PORT, () => {
+const secret = loadSessionSecret(settings);
+const sessions = new SessionStore(secret, `${DATA_DIRECTORY}/sessions.json`);
+const hidden = new HiddenStore(secret, `${DATA_DIRECTORY}/hidden.json`);
+const grabbed = new GrabbedStore(secret, `${DATA_DIRECTORY}/grabbed.json`);
+const helperFiles = process.platform === "darwin" ? new HelperFiles(HELPER_DIRECTORY) : null;
+createApp(canvasBaseUrl, sessions, hidden, grabbed, helperFiles).listen(PORT, () => {
   console.log(`API server listening on http://localhost:${PORT} (Canvas: ${canvasBaseUrl})`);
 });

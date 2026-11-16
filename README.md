@@ -11,10 +11,26 @@ struggle, and almost all of them post work on Canvas.
 
 - **One list across all courses**, each card labeled by course and linked to the
   assignment in Canvas. Overdue work is highlighted in red.
+- **Home, Assignments, Grades, Tests and Settings tabs**, with summary tiles and a
+  "Next up" card on Home.
 - **Log in with your own Canvas calendar link.** Each person sees their own assignments.
   The app greets you by name and keeps you logged in across restarts until you log out.
-- **Stays current:** re-checks Canvas every 5 minutes and whenever you return to the tab.
-- **Demo mode** with sample data, for trying it without a Canvas account.
+- **Stays current:** re-checks Canvas every 5 minutes and whenever you return to the tab,
+  with a check mark showing whether the last check worked.
+- **Mark done, hide, mute:** ✓ Done with Undo, "Hide all like this" for repeating items,
+  and per-assignment mute for reminders.
+- **Course priority and friendlier names:** mark courses High / Normal / Low, sort by
+  priority, and rename cryptic course codes.
+- **Reminders:** browser alerts and sounds 1 day, 3 hours and 1 hour before work is due,
+  plus an optional Mac background helper that keeps reminding with the browser closed.
+- **iPhone reminders:** the Mac helper can keep a list in Apple Reminders that syncs to
+  the iPhone; ticking one off there marks it Done in the app.
+- **Comments** on each assignment, and **Add to Google Calendar** with the comments
+  copied in.
+- **Gradescope and PrairieTest:** a small browser extension grabs Gradescope scores and
+  PrairieTest exams, shown on the Grades and Tests tabs with booking reminders.
+- **Light and dark themes** and **demo mode** with sample data, for trying it without a
+  Canvas account.
 
 ## How it works
 
@@ -27,8 +43,12 @@ struggle, and almost all of them post work on Canvas.
 - **Logins:** feed links are encrypted with AES-256-GCM and stored on the server. The
   browser holds only a random session ID in an `httpOnly` cookie. The server accepts
   only Canvas feed URLs on the configured Canvas host.
+- **Mac helper:** a small Node process (`npm run helper:install`) that shows banners and
+  alarms and talks to Apple Reminders through AppleScript.
+- **Extension:** a Chromium extension in `extension/` that reads Gradescope and PrairieTest
+  pages and hands them to the app.
 - **Tests:** Vitest, covering feed parsing, grouping and sorting, due-date labels, and
-  the login API against a fake Canvas server.
+  the login API against a fake Canvas server, reminders, the Mac helper and the extension readers.
 
 ## Run it
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDue, dueGroup } from "./dueLabel.js";
+import { describeDue, dueGroup, describeExamDays } from "./dueLabel.js";
 
 // Local time, so the calendar-day logic doesn't depend on the test machine's zone.
 const now = new Date(2026, 9, 6, 10, 0); // Tue Oct 6, 10:00 AM
@@ -27,5 +27,16 @@ describe("describeDue", () => {
 
   it("says when overdue work was due", () => {
     expect(describeDue(new Date(2026, 9, 5, 23, 59), now)).toMatch(/^Overdue · was due/);
+  });
+});
+
+describe("describeExamDays", () => {
+  it("names the first and last day a test can be taken", () => {
+    const text = describeExamDays("2026-11-16T12:00:00Z", "2026-11-17T23:00:00Z");
+    expect(text).toMatch(/^Exam days: .*16.* – .*17/);
+  });
+
+  it("names one day when the test is only on one day", () => {
+    expect(describeExamDays("2026-11-16T12:00:00Z", "2026-11-16T20:00:00Z")).toMatch(/^Exam day: /);
   });
 });

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { friendlyCourseName, parseCalendarFeed, parseDueDate } from "./calendarFeed.js";
+import {
+  friendlyCourseName,
+  isClassMeeting,
+  parseCalendarFeed,
+  parseDueDate,
+} from "./calendarFeed.js";
 
 // Shaped like a real Canvas feed: CRLF line endings, long lines folded behind
 // a leading space, all-day dates with a doubled VALUE=DATE, and the course
@@ -24,6 +29,11 @@ const SAMPLE_FEED = [
   "URL;VALUE=URI:https://canvas.illinois.edu/calendar#assignment_42",
   "END:VEVENT",
   "BEGIN:VEVENT",
+  "UID:event-assignment-1726954",
+  "DTSTART;VALUE=DATE;VALUE=DATE:20261019",
+  "SUMMARY:A&P Class 13 [eng_100_120268_265701]",
+  "END:VEVENT",
+  "BEGIN:VEVENT",
   "UID:event-calendar-event-773567",
   "DTSTART;VALUE=DATE:20261005",
   "SUMMARY:Office hours [math_231_120268_260333]",
@@ -39,7 +49,7 @@ describe("parseCalendarFeed", () => {
     expect(feed.ownerName).toBe("Ada");
   });
 
-  it("keeps assignments and skips other calendar events", () => {
+  it("keeps assignments and skips class meetings and other calendar events", () => {
     expect(feed.assignments.map((assignment) => assignment.id)).toEqual([1719207, 42]);
   });
 
@@ -71,14 +81,26 @@ describe("parseCalendarFeed", () => {
 });
 
 describe("friendlyCourseName", () => {
-  it("shortens Illinois course codes and leaves others alone", () => {
+  it("shortens Illinois course codes", () => {
     expect(friendlyCourseName("math_231_120268_260333")).toBe("MATH 231");
-    expect(friendlyCourseName("vcstud_cc_open_249979")).toBe("vcstud_cc_open_249979");
+  });
+
+  it("names a course with no number by its first word, and leaves odd codes alone", () => {
+    expect(friendlyCourseName("citl_citl_open_260025")).toBe("CITL");
+    expect(friendlyCourseName("Orientation")).toBe("Orientation");
   });
 });
 
 describe("parseDueDate", () => {
   it("rejects values that aren't dates", () => {
     expect(parseDueDate("next tuesday")).toBeNull();
+  });
+});
+
+describe("isClassMeeting", () => {
+  it("spots numbered class days but keeps real work that mentions class", () => {
+    expect(isClassMeeting("A&P Class 13")).toBe(true);
+    expect(isClassMeeting("GP5: In-class Presentation")).toBe(false);
+    expect(isClassMeeting("A10: Stepping Stones")).toBe(false);
   });
 });

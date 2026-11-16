@@ -1,3 +1,6 @@
+.claude
+.claude-sessions
+.githooks
 node_modules
 dist
 package-lock.json

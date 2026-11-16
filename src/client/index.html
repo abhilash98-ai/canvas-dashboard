@@ -4,31 +4,65 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>What's Due</title>
+    <!-- Lets the Brave extension know this is What's Due. -->
+    <meta name="whats-due" />
+    <script>
+      // Runs before the page is drawn so it never flashes the wrong theme. See theme.ts.
+      try {
+        var savedTheme = localStorage.getItem("whats-due-theme");
+        document.documentElement.dataset.theme =
+          savedTheme === "light" || savedTheme === "dark"
+            ? savedTheme
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+      } catch (error) {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <div id="splash" class="splash" role="status" aria-label="Loading your assignments">
+      <div class="tornado" aria-hidden="true">
+        <div class="paper" style="--i: 0"></div>
+        <div class="paper" style="--i: 1"></div>
+        <div class="paper" style="--i: 2"></div>
+        <div class="paper" style="--i: 3"></div>
+        <div class="paper" style="--i: 4"></div>
+        <div class="paper" style="--i: 5"></div>
+        <div class="splash-check">✓</div>
+      </div>
+      <p class="splash-title">What's Due</p>
+      <p class="splash-joke"></p>
+    </div>
     <main>
       <header class="top">
         <div>
           <p id="today" class="eyebrow"></p>
           <h1>What's Due</h1>
-          <p id="greeting" class="greeting"></p>
+          <p class="greeting">
+            <span id="greeting"></span><span id="connection" class="connection" hidden></span>
+          </p>
           <p id="updated" class="updated"></p>
         </div>
         <div class="actions">
-          <button
-            id="logout"
-            type="button"
-            class="secondary"
-            title="Log out and make this site forget your Canvas calendar link"
-          >
-            Log out
+          <button id="theme-button" type="button" class="secondary icon-button">
+            <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            </svg>
+            <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              />
+            </svg>
           </button>
           <button id="refresh" type="button" class="primary" aria-label="Refresh assignments">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -39,10 +73,188 @@
         </div>
       </header>
 
-      <section id="stats" class="stats" aria-label="Summary"></section>
+      <nav class="tabs" aria-label="Pages">
+        <a class="tab" href="#home" data-page="home">Home</a>
+        <a class="tab" href="#assignments" data-page="assignments">Assignments</a>
+        <a class="tab" href="#tests" data-page="tests">Tests</a>
+        <a class="tab" href="#grades" data-page="grades">Grades</a>
+        <a class="tab" href="#settings" data-page="settings">
+          Settings
+          <span id="settings-attention" class="tab-dot" title="Needs your attention" hidden></span>
+        </a>
+      </nav>
+
+      <div id="alarm-bar" class="alarm-bar" role="alert" hidden>
+        <span id="alarm-message"></span>
+        <button id="alarm-stop" type="button" class="secondary">Stop alarm</button>
+      </div>
       <p id="status" role="status"></p>
-      <div id="groups"></div>
+
+      <section id="page-home" aria-label="Home">
+        <section id="stats" class="stats" aria-label="Summary"></section>
+        <section id="next-up" class="next-up" aria-label="Next up" hidden>
+          <div class="next-up-heading">
+            <h2>Next up</h2>
+            <a id="see-all" href="#assignments"></a>
+          </div>
+          <ul id="next-up-list" class="next-up-list"></ul>
+        </section>
+      </section>
+
+      <section id="page-assignments" aria-label="Assignments" hidden>
+        <div class="sort-bar">
+          <span class="sort-label" id="sort-label">Sort</span>
+          <div class="sort-switch" role="group" aria-labelledby="sort-label">
+            <button type="button" data-sort="due" aria-pressed="true">Due date</button>
+            <button type="button" data-sort="priority" aria-pressed="false">Priority</button>
+          </div>
+        </div>
+        <p id="priority-hint" class="setting-help sort-hint" hidden>
+          Overdue work and work due in the next day stay on top. After that, courses you mark High
+          come first. Set them in <a href="#settings">Settings → Courses</a>.
+        </p>
+        <div id="groups"></div>
+        <button id="show-hidden" type="button" class="link-button" hidden></button>
+      </section>
+
+      <section id="page-tests" aria-label="Tests" hidden>
+        <p id="tests-empty" class="setting-help">
+          No tests yet. Open your PrairieTest home page in Brave with What's Due Grabber installed,
+          and your tests show up here. Click one to book it on PrairieTest.
+        </p>
+        <div id="tests-groups"></div>
+      </section>
+
+      <section id="page-grades" aria-label="Grades" hidden>
+        <h2 class="settings-title">Grades</h2>
+        <p id="grabber-status" class="setting-result" role="status"></p>
+        <p id="grades-empty" class="setting-help">
+          No grades yet. Open a course on Gradescope in Brave and click the What's Due Grabber
+          button in the toolbar. Its grades show up here.
+        </p>
+        <div id="grade-courses"></div>
+      </section>
+
+      <section id="page-settings" aria-label="Settings" hidden>
+        <h2 class="settings-title">Settings</h2>
+        <p id="alerts-banner" class="alerts-banner" role="status" hidden></p>
+        <p id="sound-click-banner" class="alerts-banner" role="status" hidden>
+          Click anywhere on this page once so alarms can make sound. Browsers keep a page silent
+          until you do.
+        </p>
+        <div class="setting">
+          <div class="setting-row">
+            <label class="alerts-toggle">
+              <input id="alerts-toggle" type="checkbox" role="switch" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Alerts</span>
+            </label>
+            <button id="test-alert" type="button" class="secondary" hidden>
+              🔔 Send a test alert
+            </button>
+          </div>
+          <p class="setting-help">
+            Notifications 1 day, 3 hours and 1 hour before things are due, while this tab is open.
+          </p>
+          <p id="alerts-note" class="setting-result"></p>
+        </div>
+        <div class="setting">
+          <div class="setting-row">
+            <label class="alerts-toggle">
+              <input id="sound-toggle" type="checkbox" role="switch" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Sound</span>
+            </label>
+            <div class="setting-buttons">
+              <button id="test-chime" type="button" class="secondary">Test chime</button>
+              <button id="test-alarm" type="button" class="secondary">Test alarm</button>
+            </div>
+          </div>
+          <p class="setting-help">
+            A chime for the 1-day and 3-hour reminders. An alarm that rings until you stop it for
+            the 1-hour reminder.
+          </p>
+        </div>
+        <div id="helper-setting" class="setting" hidden>
+          <div class="setting-row">
+            <label class="alerts-toggle">
+              <input id="helper-toggle" type="checkbox" role="switch" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Reminders with the browser closed</span>
+            </label>
+            <button id="helper-test" type="button" class="secondary">Test in 30 seconds</button>
+          </div>
+          <p class="setting-help">
+            A small helper on this Mac sends Mac banners and alarms in any app, even with Chrome
+            closed. It follows the switches above and your muted assignments.
+          </p>
+          <p id="helper-status" class="setting-result" role="status"></p>
+          <div class="setting-row phone-row">
+            <label class="alerts-toggle">
+              <input id="phone-toggle" type="checkbox" role="switch" />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span>Also on my iPhone</span>
+            </label>
+          </div>
+          <p class="setting-help">
+            Keeps a "What's Due" list in the Reminders app, which iCloud copies to your iPhone. Each
+            reminder alerts 1 day, then 3 hours, then 1 hour before it's due, and your phone still
+            gets the next alert when the Mac is off. Tick one off on your phone and it stays off.
+          </p>
+          <p id="phone-status" class="setting-result" role="status"></p>
+        </div>
+        <div class="setting">
+          <div class="setting-row">
+            <h3>Practice reminder</h3>
+            <button id="practice-reminder" type="button" class="secondary">Run practice</button>
+          </div>
+          <p class="setting-help">
+            Sets off the reminders for everything due in the next day, using the switches above.
+            Muted assignments stay silent.
+          </p>
+          <p id="practice-result" class="setting-result" role="status"></p>
+        </div>
+        <div class="setting">
+          <h3>Courses</h3>
+          <p class="setting-help">
+            Click a course's name to rename it; leave it blank to use Canvas's name.
+          </p>
+          <p class="setting-help">
+            <strong>Priority</strong> is used when Assignments is sorted by Priority, and for Next
+            up on Home. Work from a High course moves up; work from a Low course moves down.
+            Anything due within a day stays on top either way.
+          </p>
+          <p id="course-weights-empty" class="setting-help">
+            Your courses show up here once they load.
+          </p>
+          <ul id="course-weights" class="course-weights"></ul>
+        </div>
+        <div class="setting">
+          <h3>Muted assignments</h3>
+          <p id="muted-empty" class="setting-help">
+            Nothing is muted. Use the ⋯ menu on an assignment to silence just that one.
+          </p>
+          <ul id="muted-list" class="muted-list"></ul>
+        </div>
+        <div class="setting">
+          <div class="setting-row">
+            <h3>Account</h3>
+            <button
+              id="logout"
+              type="button"
+              class="secondary"
+              title="Log out and make this site forget your Canvas calendar link"
+            >
+              Log out
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
+    <div id="toast" class="toast" role="status" hidden>
+      <span id="toast-message"></span>
+      <button id="toast-undo" type="button">Undo</button>
+    </div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

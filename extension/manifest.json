@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "What's Due Grabber",
+  "version": "0.1.0",
+  "description": "Copies grades from Gradescope and tests from PrairieTest into What's Due.",
+  "action": {
+    "default_title": "Grab this page for What's Due",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["activeTab", "scripting", "storage"],
+  "content_scripts": [
+    {
+      "matches": ["http://localhost/*", "http://localhost:5173/*", "http://127.0.0.1:5173/*"],
+      "js": ["build/bridge.js"]
+    },
+    {
+      "matches": ["https://*.prairietest.com/*"],
+      "js": ["build/autoGrab.js"]
+    }
+  ]
+}

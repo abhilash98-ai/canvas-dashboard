@@ -15,3 +15,8 @@ xcuserdata/
 DerivedData/
 __pycache__/
 .venv/
+
+# Saved course pages used to build the extension readers (contain personal info)
+*-sample.html
+*-sample_files/
+extension/build/

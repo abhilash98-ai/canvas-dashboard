@@ -1,4 +1,5 @@
 import { ApiError, fetchCurrentUser, requestJson } from "./api.js";
+import { startSplash } from "./splash.js";
 
 const form = document.querySelector<HTMLFormElement>("#login-form")!;
 const feedUrlInput = document.querySelector<HTMLInputElement>("#feed-url")!;
@@ -42,8 +43,18 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-// Already logged in? Skip straight to the dashboard.
+const splash = startSplash(document.querySelector<HTMLElement>("#splash")!, {
+  doneText: "Ready!",
+  // Nothing to wait for here; about 2 seconds in all (Abhilash asked for slightly longer than 1.6).
+  minimumMs: 1500,
+  settleMs: 350,
+});
+
+// Already logged in? Skip straight to the dashboard, which plays its own splash.
 fetchCurrentUser().then(
   () => window.location.replace("/"),
-  () => feedUrlInput.focus(),
+  async () => {
+    await splash.finish();
+    feedUrlInput.focus();
+  },
 );

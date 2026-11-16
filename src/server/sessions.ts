@@ -1,6 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { readJsonFile, writeJsonFile } from "./jsonFile.js";
 
 // Who is logged in. Each visitor's Canvas calendar link stays on the server;
 // their browser only holds a random session ID in a cookie. Sessions are saved to a
@@ -47,32 +46,13 @@ export class SessionStore {
     private readonly filePath: string | null,
   ) {
     this.key = createHash("sha256").update(secret).digest();
-    this.sessions = new Map(Object.entries(this.readFile()));
-  }
-
-  private readFile(): Record<string, SavedSession> {
-    if (!this.filePath) {
-      return {};
-    }
-    try {
-      return JSON.parse(readFileSync(this.filePath, "utf8")) as Record<string, SavedSession>;
-    } catch {
-      return {}; // No sessions saved yet.
-    }
+    this.sessions = new Map(Object.entries(filePath ? readJsonFile<SavedSession>(filePath) : {}));
   }
 
   private save(): void {
-    if (!this.filePath) {
-      return;
+    if (this.filePath) {
+      writeJsonFile(this.filePath, Object.fromEntries(this.sessions));
     }
-    mkdirSync(dirname(this.filePath), { recursive: true });
-    // Write a temporary file then swap it in, so a crash mid-write can't
-    // leave a half-written sessions file. Only this computer's user can read it.
-    const temporaryPath = `${this.filePath}.tmp`;
-    writeFileSync(temporaryPath, JSON.stringify(Object.fromEntries(this.sessions)), {
-      mode: 0o600,
-    });
-    renameSync(temporaryPath, this.filePath);
   }
 
   create(session: Session): string {

@@ -4,15 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Log in · What's Due</title>
+    <script>
+      // Runs before the page is drawn so it never flashes the wrong theme. See theme.ts.
+      try {
+        var savedTheme = localStorage.getItem("whats-due-theme");
+        document.documentElement.dataset.theme =
+          savedTheme === "light" || savedTheme === "dark"
+            ? savedTheme
+            : matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+      } catch (error) {
+        document.documentElement.dataset.theme = "light";
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <div id="splash" class="splash" role="status" aria-label="Opening What's Due">
+      <div class="stamp-scene" aria-hidden="true">
+        <div class="stamp-sheet">
+          <div class="stamp-mark">
+            <div class="stamp-ink">DUE</div>
+            <div class="stamp">
+              <div class="stamp-knob"></div>
+              <div class="stamp-neck"></div>
+              <div class="stamp-base"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="splash-title">What's Due</p>
+      <p class="splash-joke"></p>
+    </div>
     <main class="login">
       <p class="eyebrow">Canvas assignment dashboard</p>
       <h1>What's Due</h1>

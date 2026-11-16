@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>What's Due Grabber</title>
+    <style>
+      body {
+        width: 280px;
+        margin: 0;
+        padding: 16px;
+        font:
+          14px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+        color: #1c2340;
+        background: #fbfaf7;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      .error {
+        color: #b42318;
+      }
+      a {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #2f5bea;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>What's Due Grabber</h1>
+    <p id="message" role="status">Reading this page…</p>
+    <a id="open" href="http://localhost:5173/" target="_blank" hidden>Open What's Due</a>
+    <script src="build/popup.js"></script>
+  </body>
+</html>

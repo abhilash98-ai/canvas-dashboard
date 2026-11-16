@@ -42,11 +42,15 @@ export function parseDueDate(value: string): string | null {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}${utc ?? ""}`;
 }
 
-// "[math_231_120268_260333]" becomes "MATH 231"; codes that don't look like
-// subject_number_... are shown as they are.
+// "math_231_120268_260333" → "MATH 231". A code with no course number, like
+// "citl_citl_open_260025", becomes its first word: "CITL".
 export function friendlyCourseName(code: string): string {
   const match = code.match(/^([a-z]+)_(\d{3})_/i);
-  return match ? `${match[1].toUpperCase()} ${match[2]}` : code;
+  if (match) {
+    return `${match[1].toUpperCase()} ${match[2]}`;
+  }
+  const firstWord = code.match(/^([a-z]+)_/i);
+  return firstWord ? firstWord[1].toUpperCase() : code;
 }
 
 // Canvas links each entry to its calendar page, e.g.
@@ -68,6 +72,13 @@ function ownerFirstName(calendarName: string | undefined): string {
   return fullName.split(/\s+/)[0] ?? "";
 }
 
+// Some courses post each class meeting as an "assignment" (ENG 100's
+// "A&P Class 13" is attendance for that day). Those are class days, not work
+// to hand in, so they're left out. "In-class Presentation" has no number and stays.
+export function isClassMeeting(name: string): boolean {
+  return /\bclass \d+$/i.test(name);
+}
+
 function toAssignment(fields: Map<string, string>): FeedAssignment | null {
   // Only assignments; other calendar events (office hours etc.) are skipped.
   const id = Number(fields.get("UID")?.match(/^event-assignment-(\d+)$/)?.[1]);
@@ -77,9 +88,13 @@ function toAssignment(fields: Map<string, string>): FeedAssignment | null {
   }
   const summary = unescapeText(fields.get("SUMMARY") ?? "");
   const course = summary.match(/\s*\[([^\]]+)\]\s*$/);
+  const name = (course ? summary.slice(0, course.index) : summary).replace(/\s+/g, " ").trim();
+  if (isClassMeeting(name)) {
+    return null;
+  }
   return {
     id,
-    name: (course ? summary.slice(0, course.index) : summary).replace(/\s+/g, " ").trim(),
+    name,
     courseName: course ? friendlyCourseName(course[1]) : "Other",
     dueAt,
     url: assignmentUrl(fields.get("URL") ?? "", id),

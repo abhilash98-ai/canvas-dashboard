@@ -60,3 +60,25 @@ export function dueGroup(dueAt: Date, now: Date): DueGroup {
   }
   return daysAway < 7 ? "week" : "later";
 }
+
+// Tests read differently from homework: "Booking closes tomorrow, 11:59 PM"
+// for one still to book, "Exam in 3 hours" for one that's booked.
+export function describeWhen(
+  item: { dueAt: string; kind?: "toBook" | "booked" },
+  now: Date,
+): string {
+  const text = describeDue(new Date(item.dueAt), now);
+  if (item.kind === "toBook") {
+    return text.replace(/^Due/, "Booking closes");
+  }
+  return item.kind === "booked" ? text.replace(/^Due/, "Exam") : text;
+}
+
+// "Exam days: Mon, Nov 16 – Tue, Nov 17", or one day if it opens and closes the same day.
+export function describeExamDays(opensAt: string, closesAt: string): string {
+  const day = (time: string) =>
+    new Date(time).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+  const first = day(opensAt);
+  const last = day(closesAt);
+  return first === last ? `Exam day: ${first}` : `Exam days: ${first} – ${last}`;
+}
